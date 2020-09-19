@@ -1,0 +1,24 @@
+<div>
+    <button (click)="login()" >Login</button>
+    <button (click)="callApi()" >Call Api</button>
+  </div>
+
+  <div class="widget" *ngFor="let weather of weatherData">
+            
+    <div class="left-panel panel">
+        <div class="date">
+            {{weather.data | date}}
+        </div>
+        <div class="city">
+            {{weather.summary}}
+        </div>
+        <div class="temp">
+           <img src="https://s5.postimg.cc/yzcm7htyb/image.png" alt="" width="60">
+           {{weather.temperatureC}}&deg;
+        </div>
+    </div>
+    <div class="right-panel panel">
+        <img src="https://s5.postimg.cc/lifnombwz/mumbai1.png" alt="" width="160">
+    </div>
+
+</div>

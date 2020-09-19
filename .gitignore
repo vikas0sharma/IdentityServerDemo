@@ -338,3 +338,51 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+
+
+# compiled output
+/src/WeatherAPI/ClientApp/dist
+/src/WeatherAPI/ClientApp/tmp
+/src/WeatherAPI/ClientApp/out-tsc
+# Only exists if Bazel was run
+/src/WeatherAPI/ClientApp/bazel-out
+
+# dependencies
+/src/WeatherAPI/ClientApp/node_modules
+
+# profiling files
+chrome-profiler-events*.json
+speed-measure-plugin*.json
+
+# IDEs and editors
+/src/WeatherAPI/ClientApp/.idea
+/src/WeatherAPI/ClientApp/.project
+/src/WeatherAPI/ClientApp/.classpath
+.c9/
+/src/WeatherAPI/ClientApp/*.launch
+/src/WeatherAPI/ClientApp/.settings/
+/src/WeatherAPI/ClientApp/*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
