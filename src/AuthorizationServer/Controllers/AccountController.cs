@@ -1,14 +1,18 @@
 ﻿using AuthorizationServer.Models;
 using AuthorizationServer.Models.Account;
+using IdentityModel;
+using IdentityServer4;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace AuthorizationServer.Controllers
@@ -90,6 +94,65 @@ namespace AuthorizationServer.Controllers
             return View(vm);
         }
 
+        public IActionResult ExternalLogin(string provider, string returnUrl)
+        {
+            var redirectUri = Url.Action(nameof(ExternalLoginCallback));
+
+            var props = new AuthenticationProperties
+            {
+                RedirectUri = redirectUri,
+                Items =
+                {
+                    { "scheme", provider },
+                    { "returnUrl", returnUrl }
+                }
+            };
+
+            return Challenge(props, provider);
+        }
+
+        public async Task<IActionResult> ExternalLoginCallback()
+        {
+            var result = await HttpContext.AuthenticateAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+
+            if (!result.Succeeded)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var externalUser = result.Principal;
+            if (externalUser == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var claims = externalUser.Claims.ToList();
+            var userIdClaim = claims.FirstOrDefault(x => x.Type == JwtClaimTypes.Subject);
+            if (userIdClaim == null)
+            {
+                userIdClaim = claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+            }
+            if (userIdClaim == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var externalUserId = userIdClaim.Value;
+            var externalProvider = userIdClaim.Issuer;
+
+            await HttpContext.SignInAsync(new IdentityServerUser(externalUserId)
+            {
+                DisplayName = externalUserId,
+                IdentityProvider = externalProvider,
+                AuthenticationTime = DateTime.Now
+            });
+
+            // delete temporary cookie used during external authentication
+            await HttpContext.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+
+            return Redirect(result.Properties.Items["returnUrl"]);
+        }
+
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Register(string returnUrl = null)
@@ -141,10 +204,12 @@ namespace AuthorizationServer.Controllers
                     allowLocal = client.EnableLocalLogin;
                 }
             }
+            var externalProviders = await signInManager.GetExternalAuthenticationSchemesAsync();
             return new LoginViewModel
             {
                 ReturnUrl = returnUrl,
                 Email = context?.LoginHint,
+                ExternalProviders = externalProviders
             };
         }
 

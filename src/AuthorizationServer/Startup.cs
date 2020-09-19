@@ -1,5 +1,6 @@
 using AuthorizationServer.Models;
 using AuthorizationServer.Persistence;
+using IdentityServer4;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -46,15 +47,21 @@ namespace AuthorizationServer
                 .AddAspNetIdentity<AppUser>()
                 .AddConfigurationStore<AuthConfigurationDbContext>(options =>
                 {
-                    // options.DefaultSchema = "Identity";
                     options.ConfigureDbContext = b => b.UseSqlServer(connectionString, sqlOptions => sqlOptions.MigrationsAssembly(migrationsAssembly));
                 })
                 .AddOperationalStore<AuthPersistedGrantDbContext>(options =>
                 {
-                    // options.DefaultSchema = "Identity";
                     options.ConfigureDbContext = b => b.UseSqlServer(connectionString, sqlOptions => sqlOptions.MigrationsAssembly(migrationsAssembly));
                 })
                 .AddDeveloperSigningCredential();
+
+            services.AddAuthentication()
+                .AddGoogle("Google", config =>
+                {
+                    config.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+                    config.ClientSecret = Configuration["Keys:Google:ClientSecret"];
+                    config.ClientId = Configuration["Keys:Google:ClientId"];
+                });
 
             services.AddCors(confg =>
                 confg.AddPolicy("AllowAll", p => p.AllowAnyOrigin()

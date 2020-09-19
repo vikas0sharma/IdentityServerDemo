@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Authentication;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace AuthorizationServer.Models.Account
 {
@@ -16,5 +18,7 @@ namespace AuthorizationServer.Models.Account
         public bool RememberMe { get; set; }
 
         public string ReturnUrl { get; set; }
+
+        public IEnumerable<AuthenticationScheme> ExternalProviders { get; set; }
     }
 }
